@@ -17,53 +17,53 @@
     // （./delete フォルダーのファイルをアルファベット順ソートした順番で割り当て）
     const SYMBOL_MAP = {
         // a-z
-        'artist_r': 'a',
-        'at_beta': 'b',
-        'beta_ex': 'c',
-        'bib_org': 'd',
-        'binding_ex': 'e',
-        'blank': 'f',
-        'burst_ex': 'g',
-        'ced_foundation': 'h',
-        'censorship': 'i',
-        'comma_ex': 'j',
-        'comma_qu': 'k',
-        'digital_burnout': 'l',
-        'double_neg': 'm',
-        'echo_ex': 'n',
-        'fiction_exhibition': 'o',
-        'flash_ex': 'p',
-        'fragment_qu': 'q',
-        'hyper_period': 'r',
-        'incomplete_qu': 's',
-        'incomplete_tesseract': 't',
-        'infinite_qu': 'u',
-        'jpex': 'v',
-        'jpex_sub': 'w',
-        'jpqu': 'x',
-        'jpqu_sub': 'y',
-        'labyrinth_qu': 'z',
+        'artist_r': 'a', '同一アート作家_R': 'a', '同一アート作家R': 'a',
+        'at_beta': 'b', 'アット:β': 'b', 'アットβ': 'b',
+        'beta_ex': 'c', 'ベタクラメーション': 'c',
+        'bib_org': 'd', 'BIB': 'd',
+        'binding_ex': 'e', '束縛感嘆符': 'e',
+        'blank': 'f', '空白': 'f',
+        'burst_ex': 'g', '破裂感嘆符': 'g',
+        'ced_foundation': 'h', 'CED財団': 'h',
+        'censorship': 'i', '検閲符': 'i',
+        'comma_ex': 'j', '句点和感嘆符': 'j',
+        'comma_qu': 'k', '句点和疑問符': 'k',
+        'digital_burnout': 'l', 'デジタル_バーンアウト': 'l', 'デジタルバーンアウト': 'l',
+        'double_neg': 'm', '二重否符': 'm',
+        'echo_ex': 'n', '反響感嘆符': 'n',
+        'fiction_exhibition': 'o', '架空疑問展': 'o',
+        'flash_ex': 'p', '閃光感嘆符': 'p',
+        'fragment_qu': 'q', '断片疑問符': 'q',
+        'hyper_period': 'r', 'ハイパーピリオド': 'r',
+        'incomplete_qu': 's', '不完全疑問符': 's',
+        'incomplete_tesseract': 't', '不完全超立方体': 't',
+        'infinite_qu': 'u', '無限疑問符': 'u',
+        'jpex': 'v', '読点和感嘆符': 'v',
+        'jpex_sub': 'w', '読点和感嘆符（亜種）': 'w', '読点和感嘆符亜種': 'w',
+        'jpqu': 'x', '読点和疑問符': 'x',
+        'jpqu_sub': 'y', '読点和疑問符（亜種）': 'y', '読点和疑問符亜種': 'y',
+        'labyrinth_qu': 'z', '迷宮疑問符': 'z',
         // A-Z
-        'minimal_ex': 'A',
-        'multilayer_qu': 'B',
-        'node_labo': 'C',
-        'oblivion_qu': 'D',
-        'opaque_qu': 'E',
-        'overlook': 'F',
-        'pc_ultimate_right': 'G',
-        'permeation_qu': 'H',
-        'resonance_ex': 'I',
-        'silent_ex': 'J',
-        'simmer': 'K',
-        'super_qu': 'L',
-        'super_qu_sub': 'M',
-        'thanks_ex': 'N',
-        'tired_ex': 'O',
-        'transparent_qu': 'P',
-        'truth_key': 'Q',
-        'unfinish_qu': 'R',
-        'world_symbol_org': 'S',
-        'z_sand': 'T',
+        'minimal_ex': 'A', '極小感嘆符': 'A',
+        'multilayer_qu': 'B', '多層疑問符': 'B',
+        'node_labo': 'C', 'NodeLABO': 'C',
+        'oblivion_qu': 'D', '忘却疑問符': 'D',
+        'opaque_qu': 'E', '不透明疑問符': 'E',
+        'overlook': 'F', '俯瞰符': 'F',
+        'pc_ultimate_right': 'G', 'PCの究極権利': 'G',
+        'permeation_qu': 'H', '浸透疑問符': 'H',
+        'resonance_ex': 'I', '共鳴感嘆符': 'I',
+        'silent_ex': 'J', '静寂感嘆符': 'J',
+        'simmer': 'K', '似煮符': 'K',
+        'super_qu': 'L', '超疑問符': 'L',
+        'super_qu_sub': 'M', '超疑問符（亜種）': 'M', '超疑問符亜種': 'M',
+        'thanks_ex': 'N', '感嘆謝符': 'N',
+        'tired_ex': 'O', '疲感嘆符': 'O',
+        'transparent_qu': 'P', '透過疑問符': 'P',
+        'truth_key': 'Q', '真実_of_鍵': 'Q', '真実of鍵': 'Q',
+        'unfinish_qu': 'R', '未完疑問符': 'R',
+        'world_symbol_org': 'S', '世界記号統一団体': 'S',
+        'z_sand': 'T', 'ゼット_サンド': 'T', 'ゼットサンド': 'T',
     };
 
     /**
@@ -105,7 +105,7 @@
                     if (tag === 'SPAN' && parent.dataset && parent.dataset.wasv1) {
                         return NodeFilter.FILTER_REJECT;
                     }
-                    return /:[\w_]+:/.test(node.nodeValue)
+                    return /:([^\s:]+):/.test(node.nodeValue)
                         ? NodeFilter.FILTER_ACCEPT
                         : NodeFilter.FILTER_SKIP;
                 }
@@ -129,7 +129,7 @@
      */
     function replaceTextNode(textNode) {
         const text = textNode.nodeValue;
-        const regex = /:([\w_]+):/g;
+        const regex = /:([^\s:]+):/g;
         let lastIndex = 0;
         let match;
         const fragment = document.createDocumentFragment();
