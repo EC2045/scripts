@@ -112,30 +112,30 @@
         line-height: 1.5 !important;
       }
 
-      /* 画像のデザインを完全再現 */
       #font-ui-toggle {
-        background: #fff !important;
+        background: rgba(255, 255, 255, 0.9) !important;
         color: #000 !important;
-        border: 2px solid #000 !important;
-        padding: 8px 24px !important;
-        border-radius: 20px !important; /* 画像のような大きな角丸 */
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        width: 48px !important;
+        height: 48px !important;
+        border-radius: 50% !important;
         cursor: pointer !important;
-        font-weight: 600 !important;
-        font-size: 18px !important;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
-        transition: transform 0.2s ease !important;
-        box-shadow: none !important;
+        justify-content: center !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        backdrop-filter: blur(8px) !important;
       }
 
       #font-ui-toggle:hover {
-        transform: scale(1.02);
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important;
       }
 
       #font-ui-toggle i {
-        font-size: 22px !important;
-        color: #888 !important;
+        font-size: 20px !important;
+        color: #333 !important;
       }
 
       #font-ui-panel {
@@ -204,8 +204,7 @@
     wrapper.id = 'font-ui-wrapper';
     wrapper.innerHTML = `
       <button id="font-ui-toggle">
-        <i class="fas fa-cog"></i>
-        <span>設定</span>
+        <i class="fas fa-bars"></i>
       </button>
       <div id="font-ui-panel">
         <div class="setting-group">
