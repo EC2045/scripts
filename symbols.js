@@ -155,7 +155,7 @@
             span.title = `:${name}:`;
             span.style.fontFamily = `'${FONT_FAMILY}', sans-serif`;
             span.style.display = 'inline-block';
-            span.style.fontSize = '1.5em';
+            span.style.fontSize = '2em';
             span.style.verticalAlign = 'middle';
             span.style.lineHeight = '1';
             span.style.margin = '0 0.1em';
