@@ -1,13 +1,137 @@
-(function() {
+(function () {
   // 1. 状態管理
   const state = {
     settings: {
       fontKey: 'default',
-      theme: localStorage.getItem('theme') || (document.body.classList.contains('light-mode') ? 'light' : 'dark')
-    }
+      theme: localStorage.getItem('theme') || (document.body.classList.contains('light-mode') ? 'light' : 'dark'),
+      lang: localStorage.getItem('user-lang-setting') || null
+    },
+    langData: {}
   };
 
   const $ = (id) => document.getElementById(id);
+
+  // ---- 対応言語の定義（ここに追加するだけでUIに反映される）----
+  const LANG_OPTIONS = {
+    ja: '日本語',
+    en: 'English',
+    eo: "Esperanto",
+    moen: 'Modern English',
+    moja: '現代日本語'
+  };
+
+  const LANG_DEFAULT = Object.keys(LANG_OPTIONS)[0]; // 最初のキーがデフォルト
+
+  // ---- 言語システム ----
+
+  // 2a. langファイルのパスを取得（script要素のdata-lang-path属性から）
+  function getLangPath(langCode) {
+    const scriptEl = document.currentScript || (function () {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        if (scripts[i].src && scripts[i].src.includes('font.js')) return scripts[i];
+      }
+    })();
+    if (!scriptEl) return null;
+    const pattern = scriptEl.getAttribute('data-lang-path');
+    if (!pattern) return null;
+    return pattern.replace('{lang}', langCode);
+  }
+
+  // 2b. 使用言語を決定（優先順位: localStorage > navigator.language > LANG_DEFAULT）
+  function detectLang() {
+    if (state.settings.lang && LANG_OPTIONS[state.settings.lang]) return state.settings.lang;
+    const browserLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+    // ブラウザ言語が対応言語に含まれていればそれを使う
+    const matched = Object.keys(LANG_OPTIONS).find(code => browserLang.startsWith(code));
+    return matched || LANG_DEFAULT;
+  }
+
+  // 2c. INI形式をパース（key=value、'#'はコメント）
+  function parseLang(text) {
+    const data = {};
+    text.split('\n').forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+      const sep = line.indexOf('=');
+      if (sep < 0) return;
+      const key = line.slice(0, sep).trim();
+      const value = line.slice(sep + 1).trim();
+      if (key) data[key] = value;
+    });
+    return data;
+  }
+
+  // 2d. langファイルをfetchしてDOMに適用
+  async function loadAndApplyLang(langCode) {
+    const path = getLangPath(langCode);
+    if (!path) return; // data-lang-path未設定なら何もしない
+
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(`lang fetch failed: ${path} (${res.status})`);
+      const text = await res.text();
+      state.langData = parseLang(text);
+      applyLang();
+      state.settings.lang = langCode;
+      localStorage.setItem('user-lang-setting', langCode);
+      updateLangSelect();
+    } catch (e) {
+      console.warn('[font.js] Lang load error:', e.message);
+    }
+  }
+
+  // 2e. DOM全体を走査して "xxx.yyy" 形式のテキストノードを置換
+  function applyLang() {
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          // scriptやstyleの中身は無視
+          const parent = node.parentElement;
+          if (!parent) return NodeFilter.FILTER_REJECT;
+          const tag = parent.tagName.toLowerCase();
+          if (tag === 'script' || tag === 'style') return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    const nodesToReplace = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const trimmed = node.textContent.trim();
+      // "word.word" または "word.word.word" 形式のみ対象
+      if (/^[a-zA-Z_][\w-]*(\.[a-zA-Z_][\w.-]*)+$/.test(trimmed) && state.langData[trimmed] !== undefined) {
+        nodesToReplace.push({ node, key: trimmed });
+      }
+    }
+
+    nodesToReplace.forEach(({ node, key }) => {
+      node.textContent = state.langData[key];
+    });
+
+    // data-lang-key属性も対応（明示的なキー指定）
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const key = el.getAttribute('data-lang-key');
+      if (key && state.langData[key] !== undefined) {
+        el.textContent = state.langData[key];
+      }
+    });
+  }
+
+  // 2f. 言語切り替えのpublic API
+  window.setLang = function (langCode) {
+    loadAndApplyLang(langCode);
+  };
+
+  function updateLangSelect() {
+    const sel = $('lang-select');
+    if (sel) sel.value = state.settings.lang || detectLang();
+  }
+
+  // ---- フォントシステム ----
 
   // 2. フォントの定義
   const FONT_PRESETS = {
@@ -15,7 +139,7 @@
     mincho: '"Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif',
     gothic: '"Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif',
     sans: '"Arial", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif',
-    mono:  '"Courier New", "Consolas", "Cascadia Mono", monospace',
+    mono: '"Courier New", "Consolas", "Cascadia Mono", monospace',
     acs: '"ACS FONT","2045alphabet", "Hiragino Mincho ProN", serif'
   };
 
@@ -31,7 +155,7 @@
       try {
         const parsed = JSON.parse(savedFont);
         state.settings.fontKey = parsed.fontKey || 'default';
-      } catch(e) { console.error("Font settings load error", e); }
+      } catch (e) { console.error("Font settings load error", e); }
     }
     // 保存されたテーマがない場合は現在のHTMLの状態を優先
     if (!localStorage.getItem('theme')) {
@@ -42,7 +166,7 @@
   }
 
   // 4. 設定適用関数
-  window.setFont = function(fontKey) {
+  window.setFont = function (fontKey) {
     const fontValue = FONT_PRESETS[fontKey] || FONT_PRESETS.default;
     state.settings.fontKey = fontKey in FONT_PRESETS ? fontKey : 'default';
     document.documentElement.style.setProperty('--main-font', fontValue);
@@ -51,12 +175,12 @@
     if (select) select.value = state.settings.fontKey;
   };
 
-  window.toggleTheme = function() {
+  window.toggleTheme = function () {
     const htmlElement = document.documentElement;
     const body = document.body;
     const currentTheme = state.settings.theme;
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
+
     // 両方のパターンに対応
     htmlElement.setAttribute('data-theme', newTheme);
     if (newTheme === 'light') {
@@ -64,7 +188,7 @@
     } else {
       body.classList.remove('light-mode');
     }
-    
+
     state.settings.theme = newTheme;
     saveSettings();
 
@@ -74,7 +198,7 @@
       icon.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
       icon.style.transform = newTheme === 'dark' ? 'rotate(180deg)' : 'rotate(0deg)';
     }
-    
+
     const themeText = $('theme-status-text');
     if (themeText) themeText.textContent = newTheme === 'light' ? 'ライト' : 'ダーク';
   };
@@ -200,6 +324,31 @@
   function initUI() {
     if ($('font-ui-wrapper')) return;
 
+    // lang-selectのオプションを動的に生成（data-lang-pathが設定されている場合のみ）
+    const hasLangPath = (function () {
+      const scripts = document.getElementsByTagName('script');
+      for (let i = scripts.length - 1; i >= 0; i--) {
+        if (scripts[i].src && scripts[i].src.includes('font.js')) {
+          return !!scripts[i].getAttribute('data-lang-path');
+        }
+      }
+      return false;
+    })();
+
+    // LANG_OPTIONSからselectオプションを動的生成
+    const langOptionsHTML = Object.entries(LANG_OPTIONS)
+      .map(([code, label]) => `<option value="${code}">${label}</option>`)
+      .join('\n            ');
+
+    const langSectionHTML = hasLangPath ? `
+        <div class="setting-group">
+          <span class="setting-label">言語 / Language</span>
+          <select id="lang-select" class="setting-control" onchange="window.setLang(this.value)">
+            ${langOptionsHTML}
+          </select>
+        </div>
+    ` : '';
+
     const wrapper = document.createElement('div');
     wrapper.id = 'font-ui-wrapper';
     wrapper.innerHTML = `
@@ -231,6 +380,7 @@
             <i class="fas fa-chevron-right" style="font-size: 12px; opacity: 0.3;"></i>
           </button>
         </div>
+        ${langSectionHTML}
       </div>
     `;
     document.body.appendChild(wrapper);
@@ -250,6 +400,13 @@
     // 初期状態の適用
     applyInitialTheme();
     window.setFont(state.settings.fontKey);
+
+    // 言語の初期化（data-lang-pathがある場合のみ）
+    if (hasLangPath) {
+      const initialLang = detectLang();
+      updateLangSelect();
+      loadAndApplyLang(initialLang);
+    }
   }
 
   function applyInitialTheme() {
