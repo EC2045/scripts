@@ -83,16 +83,26 @@
 
   // 2e. DOM全体を走査して "xxx.yyy" 形式のテキストノードを置換
   function applyLang() {
+    // 1. data-lang-key属性を持つ要素のテキストを更新
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const key = el.getAttribute('data-lang-key');
+      if (key && state.langData[key] !== undefined) {
+        el.textContent = state.langData[key];
+      }
+    });
+
+    // 2. まだ属性が付いていないテキストノードを探して属性を付与した上で置換
     const walker = document.createTreeWalker(
       document.body,
       NodeFilter.SHOW_TEXT,
       {
         acceptNode(node) {
-          // scriptやstyleの中身は無視
+          // scriptやstyleの中身、および既にdata-lang-keyを持つ親要素の配下は無視
           const parent = node.parentElement;
           if (!parent) return NodeFilter.FILTER_REJECT;
           const tag = parent.tagName.toLowerCase();
           if (tag === 'script' || tag === 'style') return NodeFilter.FILTER_REJECT;
+          if (parent.hasAttribute('data-lang-key')) return NodeFilter.FILTER_REJECT;
           return NodeFilter.FILTER_ACCEPT;
         }
       }
@@ -102,21 +112,25 @@
     while (walker.nextNode()) {
       const node = walker.currentNode;
       const trimmed = node.textContent.trim();
-      // "word.word" または "word.word.word" 形式のみ対象
-      if (/^[a-zA-Z_][\w-]*(\.[a-zA-Z_][\w.-]*)+$/.test(trimmed) && state.langData[trimmed] !== undefined) {
+      if (state.langData[trimmed] !== undefined) {
         nodesToReplace.push({ node, key: trimmed });
       }
     }
 
     nodesToReplace.forEach(({ node, key }) => {
-      node.textContent = state.langData[key];
-    });
-
-    // data-lang-key属性も対応（明示的なキー指定）
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const key = el.getAttribute('data-lang-key');
-      if (key && state.langData[key] !== undefined) {
-        el.textContent = state.langData[key];
+      const parent = node.parentElement;
+      if (parent && parent.childNodes.length === 1) {
+        // 親要素がこのテキストノード1つだけを持つ場合は親に属性を付与
+        parent.setAttribute('data-lang-key', key);
+        parent.textContent = state.langData[key];
+      } else {
+        // そうでない（テキスト以外も混ざっている）場合はテキストノードのみ書き換える
+        // ただしこの場合は次回切り替え時に元のキー情報が失われるため、
+        // 独自にspanで囲んでdata-lang-keyを付与するなどの安全な置換を行う
+        const span = document.createElement('span');
+        span.setAttribute('data-lang-key', key);
+        span.textContent = state.langData[key];
+        node.parentNode.replaceChild(span, node);
       }
     });
   }
