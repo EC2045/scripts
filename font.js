@@ -3,7 +3,7 @@
   const state = {
     settings: {
       fontKey: 'default',
-      theme: localStorage.getItem('theme') || (document.body.classList.contains('light-mode') ? 'light' : 'dark'),
+      theme: localStorage.getItem('theme') || (document.body?.classList.contains('light-mode') ? 'light' : 'dark'),
       lang: localStorage.getItem('user-lang-setting') || null
     },
     langData: {}
@@ -159,7 +159,7 @@
     }
     // 保存されたテーマがない場合は現在のHTMLの状態を優先
     if (!localStorage.getItem('theme')) {
-      state.settings.theme = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+      state.settings.theme = document.body?.classList.contains('light-mode') ? 'light' : 'dark';
     } else {
       state.settings.theme = localStorage.getItem('theme');
     }
