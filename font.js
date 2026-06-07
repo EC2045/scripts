@@ -87,7 +87,7 @@
     document.querySelectorAll('[data-lang-key]').forEach(el => {
       const key = el.getAttribute('data-lang-key');
       if (key && state.langData[key] !== undefined) {
-        el.textContent = state.langData[key];
+        el.innerHTML = state.langData[key];
       }
     });
 
@@ -129,7 +129,7 @@
         // 独自にspanで囲んでdata-lang-keyを付与するなどの安全な置換を行う
         const span = document.createElement('span');
         span.setAttribute('data-lang-key', key);
-        span.textContent = state.langData[key];
+        span.innerHTML = state.langData[key];
         node.parentNode.replaceChild(span, node);
       }
     });
