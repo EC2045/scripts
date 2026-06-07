@@ -122,7 +122,7 @@
       if (parent && parent.childNodes.length === 1) {
         // 親要素がこのテキストノード1つだけを持つ場合は親に属性を付与
         parent.setAttribute('data-lang-key', key);
-        parent.textContent = state.langData[key];
+        parent.innerHTML = state.langData[key];
       } else {
         // そうでない（テキスト以外も混ざっている）場合はテキストノードのみ書き換える
         // ただしこの場合は次回切り替え時に元のキー情報が失われるため、
