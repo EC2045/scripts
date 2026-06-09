@@ -16,8 +16,8 @@
     ja: '日本語',
     en: 'English',
     eo: "Esperanto",
-    moen: 'Modern English',
-    moja: '現代日本語'
+    moen: 'Modern English（original)',
+    moja: '現代日本語(オリジナル）'
   };
 
   const LANG_DEFAULT = Object.keys(LANG_OPTIONS)[0]; // 最初のキーがデフォルト
