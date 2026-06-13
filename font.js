@@ -17,7 +17,8 @@
     en: 'English',
     eo: "Esperanto",
     moen: 'Modern English（original)',
-    moja: '現代日本語(オリジナル）'
+    moja: '現代日本語(オリジナル）',
+    langkey: 'langkey'
   };
 
   const LANG_DEFAULT = Object.keys(LANG_OPTIONS)[0]; // 最初のキーがデフォルト
@@ -146,7 +147,7 @@
       const filename = state.langData[key];
       if (!filename) return;
 
-      const dir = dirPattern.replace('{lang}', currentLang.replace("mo", ""));
+      const dir = dirPattern.replace('{lang}', currentLang.replace("mo", "").replace("langkey", "ja"));
       img.src = dir + filename.trim();
       img.alt = filename.trim();
     });
