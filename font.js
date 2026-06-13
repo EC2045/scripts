@@ -137,8 +137,7 @@
     // 3. data-lang-img属性を持つimg要素の src を言語に合わせて更新
     //    data-lang-img="art.hand.name"  → langDataのキー（ファイル名が入っている）
     //    data-lang-img-dir="./images_{lang}/"  → {lang}を現在の言語コードに置換するパターン
-    const currentLang = state.settings.lang || 'ja';
-    alert(currentLang)
+    const currentLang = langCode || 'ja';
     document.querySelectorAll('img[data-lang-img]').forEach(img => {
       const key = img.getAttribute('data-lang-img');
       const dirPattern = img.getAttribute('data-lang-img-dir');
@@ -147,7 +146,7 @@
       const filename = state.langData[key];
       if (!filename) return;
 
-      const dir = dirPattern.replace('{lang}', currentLang);
+      const dir = dirPattern.replace('{lang}', currentLang.replace("mo", ""));
       img.src = dir + filename.trim();
       img.alt = filename.trim();
     });
