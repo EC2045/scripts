@@ -18,7 +18,6 @@
     eo: "Esperanto",
     moen: 'Modern English（original)',
     moja: '現代日本語(オリジナル）',
-    langkey: 'langkey'
   };
 
   const LANG_DEFAULT = Object.keys(LANG_OPTIONS)[0]; // 最初のキーがデフォルト
@@ -138,7 +137,9 @@
     // 3. data-lang-img属性を持つimg要素の src を言語に合わせて更新
     //    data-lang-img="art.hand.name"  → langDataのキー（ファイル名が入っている）
     //    data-lang-img-dir="./images_{lang}/"  → {lang}を現在の言語コードに置換するパターン
-    const currentLang = langCode || 'ja';
+    const currentLang = state.settings.lang || 'ja';
+    console.log(currentLang)
+    console.log(state.settings.lang)
     document.querySelectorAll('img[data-lang-img]').forEach(img => {
       const key = img.getAttribute('data-lang-img');
       const dirPattern = img.getAttribute('data-lang-img-dir');
