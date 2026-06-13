@@ -133,6 +133,23 @@
         node.parentNode.replaceChild(span, node);
       }
     });
+
+    // 3. data-lang-img属性を持つimg要素の src を言語に合わせて更新
+    //    data-lang-img="art.hand.name"  → langDataのキー（ファイル名が入っている）
+    //    data-lang-img-dir="./images_{lang}/"  → {lang}を現在の言語コードに置換するパターン
+    const currentLang = state.settings.lang || 'ja';
+    document.querySelectorAll('img[data-lang-img]').forEach(img => {
+      const key = img.getAttribute('data-lang-img');
+      const dirPattern = img.getAttribute('data-lang-img-dir');
+      if (!key || !dirPattern) return;
+
+      const filename = state.langData[key];
+      if (!filename) return;
+
+      const dir = dirPattern.replace('{lang}', currentLang);
+      img.src = dir + filename.trim();
+      img.alt = filename.trim();
+    });
   }
 
   // 2f. 言語切り替えのpublic API
