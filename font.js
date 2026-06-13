@@ -151,7 +151,7 @@
       const filename = state.langData[key];
       if (!filename) return;
 
-      const dir = dirPattern.replace('{lang}', currentLang.replace("mo", "").replace("langkey", "ja").replace("mix", "ja"));
+      const dir = dirPattern.replace('{lang}', currentLang.replace("mo", "").replace("langkey", "ja"));
       img.src = dir + filename.trim();
       img.alt = filename.trim();
     });
