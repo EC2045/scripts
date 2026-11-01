@@ -101,10 +101,16 @@
   });
   window.addEventListener('languagechange', () => { if (select.value === 'auto') { if (native) write('user-lang-setting', detect()); apply(true); } });
   window.addEventListener('ec2045:languagechange', event => {
-    activeLanguage = event.detail.lang;
-    // The native selector is authoritative when changed directly.
-    select.value = ['ja', 'en'].includes(activeLanguage) ? activeLanguage : 'auto';
-    translatePage();
+    const lang = event.detail.lang;
+    const saved = read(key);
+    // A late native startup must not overwrite an explicit cross-site choice.
+    if (!event.detail.userInitiated && ['ja', 'en'].includes(saved) && saved !== lang) {
+      window.setLang(saved);
+      return;
+    }
+    if (event.detail.userInitiated) write(key, ['ja', 'en'].includes(lang) ? lang : 'auto');
+    select.value = ['ja', 'en'].includes(lang) ? lang : 'auto';
+    apply(false);
   });
   const initialise = () => apply(select.value !== 'auto');
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true }); else initialise();

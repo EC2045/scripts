@@ -66,7 +66,7 @@
 
   // 2d. langファイルをfetchしてDOMに適用
   let languageRequest = 0;
-  async function loadAndApplyLang(langCode) {
+  async function loadAndApplyLang(langCode, userInitiated = false) {
     const request = ++languageRequest;
     const path = getLangPath(langCode);
     if (!path) return; // data-lang-path未設定なら何もしない
@@ -83,7 +83,7 @@
 
       applyLang();
       document.documentElement.lang = langCode;
-      window.dispatchEvent(new CustomEvent("ec2045:languagechange", { detail: { lang: langCode } }));
+      window.dispatchEvent(new CustomEvent("ec2045:languagechange", { detail: { lang: langCode, userInitiated } }));
 
       updateLangSelect();
     } catch (e) {
@@ -164,7 +164,7 @@
 
   // 2f. 言語切り替えのpublic API
   window.setLang = function (langCode) {
-    loadAndApplyLang(langCode);
+    loadAndApplyLang(langCode, true);
   };
 
   function updateLangSelect() {
