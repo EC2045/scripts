@@ -65,20 +65,25 @@
   }
 
   // 2d. langファイルをfetchしてDOMに適用
+  let languageRequest = 0;
   async function loadAndApplyLang(langCode) {
+    const request = ++languageRequest;
     const path = getLangPath(langCode);
     if (!path) return; // data-lang-path未設定なら何もしない
 
     try {
-      const res = await fetch(path);
+      const res = await fetch(path + (path.includes("?") ? "&" : "?") + "v=20261101-1");
       if (!res.ok) throw new Error(`lang fetch failed: ${path} (${res.status})`);
       const text = await res.text();
+      if (request !== languageRequest) return;
       state.langData = parseLang(text);
 
       state.settings.lang = langCode;
       localStorage.setItem('user-lang-setting', langCode);
 
       applyLang();
+      document.documentElement.lang = langCode;
+      window.dispatchEvent(new CustomEvent("ec2045:languagechange", { detail: { lang: langCode } }));
 
       updateLangSelect();
     } catch (e) {
@@ -469,3 +474,4 @@
     run();
   }
 })();
+
