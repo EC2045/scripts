@@ -34,6 +34,12 @@
       translated = translated.replace(/\(([天知人和駿律水])\)/g, (_, day) => '(' + ({'天':'Ten','知':'Chi','人':'Jin','和':'Wa','駿':'Shun','律':'Ritsu','水':'Sui'})[day] + ')').replace(/([+−-]?\d+)\s*時間/g, '$1 hours');
       if (translated === text) translated = undefined;
     }
+    if (translated === undefined && site === 'waon-weather-forecast') {
+      const weather = value => value.replace(/晴れ?|曇り?|雨|雪|雷|のち|時々|一時/g, word => ({'晴れ':'sunny','晴':'sunny','曇り':'cloudy','曇':'cloudy','雨':'rain','雪':'snow','雷':'thunder','のち':', then ','時々':', occasionally ','一時':', briefly '})[word]);
+      translated = text.replace(/^同期完了:\s*/, 'Updated: ').replace(/^オフライン予測:\s*/, 'Offline forecast: ').replace(/本日の和温陣国は「(.+?)」の見込みです。風速・湿度ともに比較的穏やかな大気状態が予測されています。/, (_, conditions) => `Today in Waon Jinkoku: ${weather(conditions)}. Relatively calm wind and humidity conditions are expected.`).replace(/(\d+)月(\d+)日/g, '$1/$2').replace(/\((今日|明日|明後日)\)/g, (_, day) => '(' + dictionary[day] + ')');
+      if (/^[晴れ曇り雨雪雷のち時々一]+$/.test(text)) translated = weather(text);
+      if (translated === text) translated = undefined;
+    }
     if (translated === undefined) return original;
     return original.slice(0, original.indexOf(original.trimStart())) + translated + original.slice(original.trimEnd().length);
   }
@@ -49,7 +55,7 @@
         if (!record || current !== record.last) record = { original: current, last: current };
         const translated = translate(record.original);
         // Preserve implicit option values used by filters before changing their labels.
-        if (translated !== current && parent.tagName === 'OPTION' && !parent.hasAttribute('value')) parent.value = parent.textContent;
+        if (translated !== current && parent.tagName === 'OPTION' && !parent.hasAttribute('value')) parent.value = parent.value;
         if (translated !== current) node.data = translated;
         record.last = translated; originals.set(node, record);
       }
@@ -102,7 +108,7 @@
   });
   const initialise = () => apply(select.value !== 'auto');
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialise, { once: true }); else initialise();
-  fetch(new URL('site-translations.json?v=20261101-1', script.src)).then(response => {
+  fetch(new URL('site-translations.json?v=20261101-2', script.src)).then(response => {
     if (!response.ok) throw new Error(`Translations: ${response.status}`);
     return response.json();
   }).then(data => { dictionary = { ...data._common, ...data[site] }; translatePage(); }).catch(error => console.warn('[ec2045-i18n]', error));
