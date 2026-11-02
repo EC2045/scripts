@@ -12,7 +12,8 @@
   const $ = (id) => document.getElementById(id);
 
   // ---- 対応言語の定義（ここに追加するだけでUIに反映される）----
-  const LANG_OPTIONS = {
+  const scriptOptions = document.currentScript?.dataset.languages?.split(',');
+  const ALL_LANG_OPTIONS = {
     ja: '日本語',
     en: 'English',
     eo: "Esperanto",
@@ -22,6 +23,7 @@
     mix: '逆翻訳',
   };
 
+  const LANG_OPTIONS = scriptOptions ? Object.fromEntries(Object.entries(ALL_LANG_OPTIONS).filter(([code]) => scriptOptions.includes(code))) : ALL_LANG_OPTIONS;
   const LANG_DEFAULT = Object.keys(LANG_OPTIONS)[0]; // 最初のキーがデフォルト
 
   // ---- 言語システム ----
@@ -176,7 +178,8 @@
 
   // 2. フォントの定義
   const FONT_PRESETS = {
-    default: '"2045alphabet", "Hiragino Mincho ProN", serif',
+    default: 'inherit',
+    onva: '"2045alphabet", "Hiragino Sans", sans-serif',
     mincho: '"Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif',
     gothic: '"Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif',
     sans: '"Arial", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif',
@@ -210,7 +213,9 @@
   window.setFont = function (fontKey) {
     const fontValue = FONT_PRESETS[fontKey] || FONT_PRESETS.default;
     state.settings.fontKey = fontKey in FONT_PRESETS ? fontKey : 'default';
-    document.documentElement.style.setProperty('--main-font', fontValue);
+    document.documentElement.toggleAttribute('data-custom-font', state.settings.fontKey !== 'default');
+    if (state.settings.fontKey === 'default') document.documentElement.style.removeProperty('--main-font');
+    else document.documentElement.style.setProperty('--main-font', fontValue);
     saveSettings();
     const select = $('font-select');
     if (select) select.value = state.settings.fontKey;
@@ -259,12 +264,10 @@
         font-display: swap;
       }
 
-      :root {
-        --main-font: ${FONT_PRESETS.default};
-      }
+
 
       /* フォント強制適用 */
-      body, button, input, select, textarea, [class*="font-"] {
+      html[data-custom-font] body, html[data-custom-font] button, html[data-custom-font] input, html[data-custom-font] select, html[data-custom-font] textarea, html[data-custom-font] [class*="font-"] {
         font-family: var(--main-font) !important;
       }
 
@@ -401,7 +404,8 @@
           <span class="setting-label">フォント設定</span>
           <select id="font-select" class="setting-control" onchange="window.setFont(this.value)">
             <optgroup label="メイン">
-              <option value="default">2045alphabet</option>
+              <option value="default">サイト標準 / Site default</option>
+              <option value="onva">2045alphabet（ONVA文字）</option>
               <option value="mincho">明朝体</option>
               <option value="gothic">ゴシック体</option>
             </optgroup>
@@ -474,4 +478,5 @@
     run();
   }
 })();
+
 
