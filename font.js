@@ -165,8 +165,8 @@
   }
 
   // 2f. 言語切り替えのpublic API
-  window.setLang = function (langCode) {
-    loadAndApplyLang(langCode, true);
+  window.setLang = function (langCode, userInitiated = true) {
+    loadAndApplyLang(langCode, userInitiated);
   };
 
   function updateLangSelect() {

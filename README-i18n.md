@@ -6,6 +6,8 @@ The UTF-8 format is `key=value`, with `#` and `;` comments. Escape backslashes, 
 
 Existing key-based language systems keep their own root `.lang` files. The portal has a dedicated loader in `src/locales.js`, with data in its own `lang/` folder. Symbolencyclopedia keeps its existing six language files.
 
-Rittsu’s Blog additionally has `en-x-es.lang`: a fictional Spanish-inspired spelling, not Spanish translation. Initial pronounced h becomes j (`have → jave`, `home → jome`); ph becomes f (`photo → foto`); silent initial h is retained. The original/corrected buttons switch these spellings without replacing Japanese content.
+Rittsu’s Blog uses its existing article spelling buttons for Spanish-inspired English: `en.lang` includes the animated original/standard pairs. Its masthead only chooses the language. Initial pronounced h becomes j (`have → jave`, `home → jome`); ph becomes f (`photo → foto`); silent initial h is retained. The original/corrected buttons switch these spellings without replacing Japanese content.
 
 `font.js` defaults to the site’s CSS font stacks. `default` no longer forces the 2045 alphabet; `onva` is the explicit custom-font choice. Font controls and language controls remain independent.
+
+Language controls belong to the existing site UI: native language selectors stay authoritative, existing settings panels receive one language group, and other sites declare an inline header target with `data-language-target`. No floating translation panel is created. `window.EC_I18N.setLanguage(code)` is the public adapter for custom site controls.
