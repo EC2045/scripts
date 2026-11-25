@@ -18,7 +18,7 @@
     en: 'English',
     eo: "Esperanto",
     moen: 'Modern English（original)',
-    moja: '現代日本語(オリジナル）',
+    moja: '東暦日本語',
     langkey: 'langkey',
     mix: '逆翻訳',
   };
